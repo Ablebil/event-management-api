@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authRepository = require("../repositories/authRepository.js");
-const { matchedData, validationResult } = require("express-validator");
+const { validationResult, matchedData } = require("express-validator");
 
 exports.register = async (req, res) => {
   const errors = validationResult(req);
@@ -55,7 +55,8 @@ exports.login = async (req, res) => {
     );
 
     res.status(200).json({ msg: "Login successful", token });
-  } catch {
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ msg: "Login failed" });
   }
 };

@@ -10,5 +10,5 @@ exports.createUser = async (username, email, hashedPassword, role) => {
 };
 
 exports.findUserByEmail = async (email) => {
-  return await User.findOne({ where: email });
+  return await User.findOne({ where: { email } });
 };
