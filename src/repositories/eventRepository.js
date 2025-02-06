@@ -21,7 +21,9 @@ exports.createEvent = async (
   date,
   location,
   availableSeats,
-  userId
+  userId,
+  username,
+  role
 ) => {
   return await Event.create({
     name,
@@ -30,7 +32,7 @@ exports.createEvent = async (
     location,
     available_seats: availableSeats,
     created_by: userId,
-    created_by_display: "admin",
+    created_by_display: role === "admin" ? "Admin" : username,
   });
 };
 
@@ -52,16 +54,6 @@ exports.editEvent = async (
       description,
       date,
       location,
-      available_seats: availableSeats,
-    },
-    { where: { id } }
-  );
-};
-
-exports.editEventForUser = async (id, description, availableSeats) => {
-  await Event.update(
-    {
-      description,
       available_seats: availableSeats,
     },
     { where: { id } }

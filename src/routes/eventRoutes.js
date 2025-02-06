@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const {
   getEvents,
+  getEventById,
   createEvent,
   editEvent,
   deleteEvent,
@@ -15,15 +16,14 @@ const router = Router();
 
 router.get(
   "/",
-  [
-    query("title").optional().isString().withMessage("Title must be a string"),
-    param("id")
-      .optional()
-      .isInt()
-      .toInt()
-      .withMessage("Event id must be an integer"),
-  ],
+  [query("title").optional().isString().withMessage("Title must be a string")],
   getEvents
+);
+
+router.get(
+  "/:id",
+  [param("id").isInt().toInt().withMessage("Event ID must be an integer")],
+  getEventById
 );
 
 router.post(

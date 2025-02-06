@@ -7,7 +7,7 @@ exports.getEvents = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
 
   try {
-    const { title, id } = matchedData(req);
+    const { title } = matchedData(req);
 
     let results;
 
@@ -16,15 +16,29 @@ exports.getEvents = async (req, res) => {
       if (results.length === 0) {
         return res.status(404).json({ msg: "Event not found" });
       }
-    } else if (id) {
-      results = await eventRepository.getEventById(id);
-      if (!results) return res.status(404).json({ msg: "Event not found" });
     } else {
       results = await eventRepository.getAllEvents();
     }
     return res.status(200).send(results);
   } catch {
     res.status(500).json({ msg: "Failed to retrieve events" });
+  }
+};
+
+exports.getEventById = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ errors: errors.array() });
+
+  const { id } = matchedData(req);
+
+  try {
+    const event = await eventRepository.getEventById(id);
+    if (!event) return res.status(404).json({ msg: "Event not found" });
+
+    res.status(200).json(event);
+  } catch {
+    res.status(500).json({ msg: "Failed to retrieve event" });
   }
 };
 
@@ -35,10 +49,9 @@ exports.createEvent = async (req, res) => {
 
   const { name, description, date, location, available_seats } =
     matchedData(req);
-  console.log(name, description, date, location);
 
   try {
-    const { id: userId, role } = req.user;
+    const { id: userId, username, role } = req.user;
 
     if (role !== "admin")
       return res.status(403).json({ msg: "Unauthorized access" });
@@ -49,7 +62,9 @@ exports.createEvent = async (req, res) => {
       date,
       location,
       available_seats,
-      userId
+      userId,
+      username,
+      role
     );
 
     res.status(201).json({
@@ -77,7 +92,7 @@ exports.editEvent = async (req, res) => {
     matchedData(req);
 
   try {
-    const { id: userId, role } = req.user;
+    const { role } = req.user;
 
     const event = await eventRepository.getEventById(id);
     if (!event) return res.status(404).json({ msg: "Event not found" });
@@ -85,21 +100,14 @@ exports.editEvent = async (req, res) => {
     if (role !== "admin")
       return res.status(403).json({ msg: "Unauthorized access" });
 
-    if (userId !== event.created_by)
-      return res.status(403).json({ msg: "Unauthorized access" });
-
-    if (role === "admin") {
-      await eventRepository.editEvent(
-        id,
-        name,
-        description,
-        date,
-        location,
-        available_seats
-      );
-    } else {
-      await eventRepository.editEventForUser(id, description, available_seats);
-    }
+    await eventRepository.editEvent(
+      id,
+      name,
+      description,
+      date,
+      location,
+      available_seats
+    );
 
     res.status(200).json({ msg: "Event edited successfully" });
   } catch {
