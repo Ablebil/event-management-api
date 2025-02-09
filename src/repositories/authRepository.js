@@ -28,9 +28,16 @@ exports.findUserById = async (userId) => {
 };
 
 exports.updateUserRefreshToken = async (userId, refreshToken) => {
-  await User.update({ refreshToken }, { where: { id: userId } });
+  return await User.update(
+    { refresh_token: refreshToken },
+    { where: { id: userId } }
+  );
 };
 
 exports.findUserByRefreshToken = async (refreshToken) => {
-  await User.findOne({ where: { refresh_token: refreshToken } });
+  return await User.findOne({ where: { refresh_token: refreshToken } });
+};
+
+exports.removeRefreshToken = async (userId) => {
+  return await User.update({ refresh_token: null }, { where: { id: userId } });
 };

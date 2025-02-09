@@ -48,7 +48,7 @@ exports.login = async (req, res) => {
     if (!validPassword)
       return res.status(401).json({ msg: "Invalid password" });
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
@@ -62,7 +62,9 @@ exports.login = async (req, res) => {
 
     await authRepository.updateUserRefreshToken(user.id, refreshToken);
 
-    res.status(200).json({ msg: "Login successful", token });
+    res
+      .status(200)
+      .json({ msg: "Login successful", accessToken, refreshToken });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "Login failed" });
@@ -98,5 +100,24 @@ exports.refreshToken = async (req, res) => {
     );
   } catch {
     res.status(500).json({ msg: "Failed to refresh token" });
+  }
+};
+
+exports.logout = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ errors: errors.array() });
+
+  const { refreshToken } = matchedData(req);
+
+  try {
+    const user = await authRepository.findUserByRefreshToken(refreshToken);
+    if (!user) return res.status(403).json({ msg: "Invalid refresh token" });
+
+    await authRepository.removeRefreshToken(user.id);
+
+    res.status(200).json({ msg: "Logout successful" });
+  } catch {
+    res.status(500).json({ msg: "Logout failed" });
   }
 };

@@ -3,6 +3,7 @@ const {
   register,
   login,
   refreshToken,
+  logout,
 } = require("../controllers/authController.js");
 const {
   userValidationSchema,
@@ -23,5 +24,17 @@ router.post(
 );
 
 router.post("/refresh-token", refreshToken);
+
+router.post(
+  "/logout",
+  [
+    body("refreshToken")
+      .isString()
+      .withMessage("Invalid refresh token format")
+      .notEmpty()
+      .withMessage("Refresh token is required"),
+  ],
+  logout
+);
 
 module.exports = router;
