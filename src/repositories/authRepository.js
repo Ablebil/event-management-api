@@ -26,3 +26,11 @@ exports.findUserById = async (userId) => {
     throw new Error("Error fetching user:", err.message);
   }
 };
+
+exports.updateUserRefreshToken = async (userId, refreshToken) => {
+  await User.update({ refreshToken }, { where: { id: userId } });
+};
+
+exports.findUserByRefreshToken = async (refreshToken) => {
+  await User.findOne({ where: { refresh_token: refreshToken } });
+};

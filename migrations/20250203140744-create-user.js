@@ -27,6 +27,10 @@ module.exports = {
         allowNull: false,
         defaultValue: "user",
       },
+      refresh_token: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
